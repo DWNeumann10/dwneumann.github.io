@@ -1,0 +1,21 @@
+name: "Douglas Neumann Data Science"
+output_dir: "docs"
+navbar:
+  title: "Douglas Neumann Data Science"
+  left:
+    - text: "home"
+      href: index.html 
+    - text: "About"
+      href: About.html
+    - text: "Resume"
+      href: Resume.html
+    - text: "503 Final Project"
+      href: dashboard.html
+    - text: "Assignments"
+      href: assignments.html
+    - text: "Visualizations"
+      href: Visualizations.html
+      
+output: 
+  html_document:
+    theme: spacelab

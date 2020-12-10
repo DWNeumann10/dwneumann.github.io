@@ -1,0 +1,410 @@
+---
+title: "Douglas Neumann Visualizations"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: spacelab
+    highlight: kate
+    
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning  = FALSE)
+
+```
+
+ <font size="+6"><strong><center><em> Biden & Trump Twitter </em></center></strong></font>
+ 
+<font size="+2">A key battleground for the 2020 Preseidential election was fought on Twitter. While the standard routine of giving stump speeches, shaking hands, and kissing babies was severly restricted due to the outbreak of the COVID-19 Pandemic, messaging on social media became even more important.Twitter became a key battleground for that messaging. The data came from tweets containing the use of #JoeBiden and #DonaldTrump. The following visualizations show the story of the 2020 election as it was fought in the trenches of twitter.</font>
+
+```{r}
+biden <- read.csv("C://Users//12607//Desktop//final_Project//biden_short.csv")
+trump <- read.csv("C://Users//12607//Desktop//final_Project//trump_short.csv")
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+theme_set(theme_minimal())
+```
+
+```{r}
+biden_day_count <- biden %>%
+          group_by(created_at = as.Date(created_at)) %>%
+          summarise(comments = n())
+trump_day_count <- trump %>%
+          group_by(created_at = as.Date(created_at)) %>%
+          summarise(comments = n())
+colnames(biden_day_count) <- c("date", "biden_count")
+colnames(trump_day_count) <- c("date", "trump_count")
+
+```
+
+```{r}
+combined_count <- biden_day_count %>% right_join(trump_day_count, by=c("date"))
+fin_comb_count <- combined_count[-c(4), ] 
+fin_biden_day_count <- biden_day_count[-c(4), ] 
+fin_trump_day_count <- trump_day_count[-c(4), ]
+
+```
+
+```{r}
+bll<- biden[-which(biden$lat == ""), ]
+tll<- trump[-which(trump$lat == ""), ]
+# bwl.1<- biden[-which(biden$country == "United States of America"), ]
+# bwl.2<- bwl.1[-which(bwl.1$country == "United States"), ]
+# bwl<- bwl.2[-which(bwl.2$country == ""), ]
+# 
+# twl.1<- trump[-which(trump$country == "United States of America"), ]
+# twl.2<- twl.1[-which(twl.1$country == "United States"), ]
+# twl<- twl.2[-which(twl.2$country == ""), ]
+
+```
+
+```{r}
+biden_19_20 = biden[c(73384:75765),]
+trump_19_20 = trump[c(124383:128243),]
+```
+
+```{r}
+biden_19_20$likes <- as.numeric(as.character(biden_19_20$likes))
+biden_19_20$user_followers_count <- as.numeric(as.character(biden_19_20$user_followers_count))
+
+trump_19_20$likes <- as.numeric(as.character(trump_19_20$likes))
+trump_19_20$user_followers_count <- as.numeric(as.character(trump_19_20$user_followers_count))
+```
+
+
+```{r}
+library("cowplot")
+library("googleway")
+library("ggplot2")
+library("ggrepel")
+library("ggspatial")
+
+library("sf")
+library("rnaturalearth")
+library("rnaturalearthdata")
+```
+
+```{r}
+bll$long <- as.numeric(as.character(bll$long))
+bll$lat <- as.numeric(as.character(bll$lat))
+
+tll$long <- as.numeric(as.character(tll$long))
+tll$lat <- as.numeric(as.character(tll$lat))
+```
+
+```{r}
+### Begin network vis code
+library(rtweet)
+library(igraph)
+library(hrbrthemes)
+library(ggraph)
+library(tidyverse)
+```
+
+```{r}
+biden_19_20$likes <- as.numeric(as.character(biden_19_20$likes))
+biden_19_20$user_followers_count <- as.numeric(as.character(biden_19_20$user_followers_count))
+
+trump_19_20$likes <- as.numeric(as.character(trump_19_20$likes))
+trump_19_20$user_followers_count <- as.numeric(as.character(trump_19_20$user_followers_count))
+```
+
+```{r}
+filter(biden_19_20, retweet_count > 0) %>% 
+  select(user_name, city) %>%
+  unnest(city) %>% 
+  filter(!is.na(city)) %>% 
+  graph_from_data_frame() -> rt_g
+
+filter(trump_19_20, retweet_count > 0) %>% 
+  select(user_name, city) %>%
+  unnest(city) %>% 
+  filter(!is.na(city)) %>% 
+  graph_from_data_frame() -> rt_gt
+```
+
+```{r}
+filter(biden_19_20, retweet_count > 10) %>% 
+  select(user_name, city) %>%
+  unnest(city) %>% 
+  filter(!is.na(city)) %>% 
+  graph_from_data_frame() -> rt_g2
+
+filter(trump_19_20, retweet_count > 10) %>% 
+  select(user_name, city) %>%
+  unnest(city) %>% 
+  filter(!is.na(city)) %>% 
+  graph_from_data_frame() -> rt_gt2
+```
+
+```{r}
+V(rt_g2)$node_label <- unname(ifelse(degree(rt_g2)[V(rt_g2)] > 2, names(V(rt_g2)), "")) 
+V(rt_g2)$node_size <- unname(ifelse(degree(rt_g2)[V(rt_g2)] > 2, degree(rt_g2), 0)) 
+
+V(rt_gt2)$node_label <- unname(ifelse(degree(rt_gt2)[V(rt_gt2)] > 2, names(V(rt_gt2)), "")) 
+V(rt_gt2)$node_size <- unname(ifelse(degree(rt_gt2)[V(rt_gt2)] > 2, degree(rt_gt2), 0)) 
+
+### End Network vis code
+```
+
+
+
+```{r}
+### Begin Text vis code
+
+library(readr)
+library(dplyr)
+library(e1071)
+library(mlbench)
+ 
+#Text mining packages
+library(tm)
+library(SnowballC)
+library("wordcloud")
+library("RColorBrewer")
+```
+
+```{r}
+biden_19_20$tweet <- as.character(biden_19_20$tweet)
+#glimpse(biden_19_20)
+# Create corpus
+corpus = Corpus(VectorSource(biden_19_20$tweet))
+# Look at corpus
+#corpus[[1]][1]
+
+trump_19_20$tweet <- as.character(trump_19_20$tweet)
+
+# Create corpus
+corpus_t = Corpus(VectorSource(trump_19_20$tweet))
+
+```
+
+```{r}
+#Conversion to Lowercase
+corpus = tm_map(corpus, PlainTextDocument)
+corpus = tm_map(corpus, tolower)
+ 
+#Removing Punctuation
+corpus = tm_map(corpus, removePunctuation)
+
+#Remove stopwords
+corpus = tm_map(corpus, removeWords, c("que", stopwords("english")))
+corpus = tm_map(corpus, removeWords, c("this", stopwords("english")))
+corpus = tm_map(corpus, removeWords, c("and", stopwords("english")))
+corpus = tm_map(corpus, removeWords, c("will", stopwords("english")))
+#corpus = tm_map(corpus, removeWords, c("are", stopwords("english")))
+
+# Stemming
+corpus = tm_map(corpus, stemDocument)
+ 
+# Eliminate white spaces
+corpus = tm_map(corpus, stripWhitespace)
+
+#trump code begins
+#Conversion to Lowercase
+corpus_t = tm_map(corpus_t, PlainTextDocument)
+corpus_t = tm_map(corpus_t, tolower)
+ 
+#Removing Punctuation
+corpus_t = tm_map(corpus_t, removePunctuation)
+
+#Remove stopwords
+corpus_t = tm_map(corpus_t, removeWords, c("que", stopwords("english")))
+corpus_t = tm_map(corpus_t, removeWords, c("this", stopwords("english")))
+corpus_t = tm_map(corpus_t, removeWords, c("and", stopwords("english")))
+corpus_t = tm_map(corpus_t, removeWords, c("will", stopwords("english")))
+#corpus = tm_map(corpus, removeWords, c("are", stopwords("english")))
+
+# Stemming
+corpus_t = tm_map(corpus_t, stemDocument)
+ 
+# Eliminate white spaces
+corpus_t = tm_map(corpus_t, stripWhitespace)
+#corpus[[1]][1] 
+```
+
+```{r}
+DTM <- TermDocumentMatrix(corpus)
+mat <- as.matrix(DTM)
+f <- sort(rowSums(mat),decreasing=TRUE)
+dat <- data.frame(word = names(f),freq=f)
+
+DTMt <- TermDocumentMatrix(corpus_t)
+matt <- as.matrix(DTMt)
+ft <- sort(rowSums(matt),decreasing=TRUE)
+dat_t <- data.frame(word = names(ft),freq=ft)
+```
+
+```{r}
+bid_words <- head(dat, 20)
+trump_words <- head(dat_t, 20)
+### end Text vis code
+```
+
+
+```{r}
+rm(trump)
+rm(biden)
+```
+
+Column {.tabset .tabset-fade}
+-----------------------------------------------------------------------
+
+### Time Series Comparison
+
+```{r}
+# Area plot
+ggplot(fin_comb_count) + 
+  geom_area(aes(x=date, y= trump_count), 
+             color = "darkred", fill = "darkred") + 
+  geom_area(aes(x=date, y= biden_count), 
+             color = "darkblue", fill = "darkblue")+labs(title="Use of #JoeBiden (Blue) and #DonaldTrump (Red) (Final 3 Days of the Election)", 
+         x="Date", y = "Count", subtitle = "Final 3 days Leading to the Election", caption = "Trump CLearly outpaced Biden in the last three days CHECK FOR CHANGE")
+        
+
+```
+
+This is the time series explanation
+
+### Time Series Biden
+```{r}
+# Basic line plot Biden
+ggplot(data = fin_biden_day_count, aes(x = date, y = biden_count))+
+  geom_line(color = "darkblue", size = 2)+
+  labs(title="Use of #JoeBiden Through the Final 3 Days 
+       of the Election", 
+         x="Date", y = "Count")
+```  
+
+
+### Time Series Trump
+```{r}
+# Basic line plot Trump
+ggplot(data = fin_trump_day_count, aes(x = date, y = trump_count))+
+  geom_line(color = "red", size = 2)+labs(title="Use of #DonaldTrump 
+                                          Through the Final 3 Days of the Election", 
+         x="Date", y = "Count")
+```  
+
+
+### Exploratory Biden 
+```{r}
+#pairs plot
+biden_19_20%>%
+  select(!c(X)) %>% 
+  select_if(function(x){is.numeric(x)})%>%
+  filter((retweet_count < 500 | user_followers_count < 5000)) %>% 
+  pairs()
+```
+
+
+### Exploratory Trump 
+```{r}
+#pairs plot
+biden_19_20%>%
+  select(!c(X)) %>% 
+  select_if(function(x){is.numeric(x)})%>%
+  filter((retweet_count < 500 | user_followers_count < 5000)) %>% 
+  pairs()
+```
+
+
+
+### Geographical Biden
+```{r}
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+
+ggplot(data = world) +
+    geom_sf() +
+    geom_point(data = bll, aes(x = long, y = lat), size = .1, 
+        shape = 23, fill = "darkblue")
+
+
+```
+
+
+
+### Geographical Trump
+```{r}
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+
+ggplot(data = world) +
+    geom_sf() +
+    geom_point(data = tll, aes(x = long, y = lat), size = .1, 
+        shape = 23, fill = "darkred")
+
+
+```
+
+### Network Biden
+```{r}
+ggraph(rt_g2, layout = 'linear', circular = TRUE) + 
+  geom_edge_arc(edge_width=0.125, aes(alpha=..index..,start_cap = label_rect(node1.name),end_cap = label_rect(node2.name))) +
+  # geom_node_label(aes(label=node_label, size=node_size),
+  #                 label.size=10, fill="#ffffff66", segment.colour="springgreen",
+  #                 color="slateblue", repel=TRUE, family=font_rc, fontface="bold") +
+  geom_node_text(aes(label=node_label))+
+  coord_fixed() +
+  scale_size_area(trans="sqrt") +
+  labs(title="Biden Twitter City Relationships", subtitle="Most tweeted city names labeled. Darkers edges == more mentions.") +
+  theme_graph(base_family=font_rc) 
+```
+
+### Network Trump
+```{r}
+ggraph(rt_gt2, layout = 'linear', circular = TRUE) + 
+  geom_edge_arc(edge_width=0.125, aes(alpha=..index..,start_cap = label_rect(node1.name),end_cap = label_rect(node2.name))) +
+  # geom_node_label(aes(label=node_label, size=node_size),
+  #                 label.size=10, fill="#ffffff66", segment.colour="springgreen",
+  #                 color="slateblue", repel=TRUE, family=font_rc, fontface="bold") +
+  geom_node_text(aes(label=node_label))+
+  coord_fixed() +
+  scale_size_area(trans="sqrt") +
+  labs(title="Trump Twitter City Relationships", subtitle="Most tweeted city names labeled. Darkers edges == more mentions.") +
+  theme_graph(base_family=font_rc) 
+```
+
+### Text - Wordcloud Biden
+```{r}
+set.seed(10)
+wordcloud(words = bid_words$word, freq = bid_words$freq, random.order=FALSE, rot.per=0.30, colors=brewer.pal(8, "Dark2"))
+```
+
+### Text - Wordcloud Trump
+```{r}
+set.seed(10)
+wordcloud(words = trump_words$word, freq = bid_words$freq, random.order=FALSE, rot.per=0.30, colors=brewer.pal(8, "Dark2"))
+```
+
+
+### Text - Bar Grapah Biden
+```{r}
+# Minimal theme + blue fill color
+p<-ggplot(data=bid_words, aes(x=word, y=freq)) +
+  geom_bar(stat="identity", fill="darkblue")+
+  theme_minimal()
+p+ coord_flip()+ labs(title="Most Used Words in Biden Twitter", 
+         x="Word", y = "Count")
+```
+
+
+### Text - Bar Graph Trump
+```{r}
+
+p<-ggplot(data=trump_words, aes(x=word, y=freq)) +
+  geom_bar(stat="identity", fill="darkred")+
+  theme_minimal()
+p+ coord_flip()+labs(title="Most Used Words in Trump Twitter", 
+         x="Word", y = "Count")
+
+```

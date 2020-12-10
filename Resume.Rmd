@@ -1,0 +1,8 @@
+---
+title: "Resume"
+author: "Doug Neumann"
+output: html_document
+---
+
+<img src="Resume.jpg" style="width:100%">
+
