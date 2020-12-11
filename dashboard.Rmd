@@ -255,10 +255,16 @@ rm(biden)
 
 Column {.tabset .tabset-fade}
 -----------------------------------------------------------------------
+### About
+
+The data for this project came from Twitter via kaggle (www.kaggle.com/manchunhui/us-election-2020-tweets). The data covers a period of over 25 days starting in the middle of October and going a few days past the election. There is a total of two CSV files (#JoeBiden & #DonaldTrump). This analysis servers to manifest how the hashtags were used during the election.
+
+R Studio Version 1.2.1335 and Flexdashboard Version 0.5.2 were used for this project.
+
 
 ### The Data
 
-The data for this analysis comes from twitter and via kaggle. It was initally was over a 25 day period starting in the middle of October and going a few days past the elections. Due to the sheer magnitude of the data it was redcuced in scope to make processing possible.
+Due to the sheer magnitude of the data it was redcuced in scope to make processing possible.
 
 ```{r}
 bll_head <- head(bll, 5)
