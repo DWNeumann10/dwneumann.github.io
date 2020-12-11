@@ -3,7 +3,7 @@ output_dir: "docs"
 navbar:
   title: "Douglas Neumann Data Science"
   left:
-    - text: "home"
+    - text: "Home"
       href: index.html 
     - text: "About"
       href: About.html
@@ -11,10 +11,24 @@ navbar:
       href: Resume.html
     - text: "503 Final Project"
       href: dashboard.html
-    - text: "Assignments"
-      href: assignments.html
     - text: "Visualizations"
       href: Visualizations.html
+    - text: "Assignments"
+      menu:
+          - text: "Assignment 1"
+            href: Assignment_1.html
+          - text: "Assignment 2"
+            href: Assignment_2.html
+          - text: "Assignment 3"
+            href: Assignment_3.html
+          - text: "Assignment 4"
+            href: Assignment_4.html
+          - text: "Assignment 5"
+            href: Assignment_5.html
+          - text: "Assignment 6"
+            href: Assignment_6.html
+          - text: "Assignment 7"
+            href: Assignment_7.html
       
 output: 
   html_document:

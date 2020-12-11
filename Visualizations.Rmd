@@ -2,3 +2,4 @@
 title: "Visualizations"
 output: html_document
 ---
+<img src="Coast Guard Word Art.jpg" style="width:35%">

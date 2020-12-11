@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning  = FALSE)
 
  <font size="+6"><strong><center><em> Biden & Trump Twitter </em></center></strong></font>
  
-<font size="+2">A key battleground for the 2020 Preseidential election was fought on Twitter. While the standard routine of giving stump speeches, shaking hands, and kissing babies was severly restricted due to the outbreak of the COVID-19 Pandemic, messaging on social media became even more important.Twitter became a key battleground for that messaging. The data came from tweets containing the use of #JoeBiden and #DonaldTrump. The following visualizations show the story of the 2020 election as it was fought in the trenches of twitter.</font>
+<font size="+2">A key battleground for the 2020 Preseidential election was fought on Twitter. While the standard routine of giving stump speeches, shaking hands, and kissing babies was severely restricted due to the outbreak of the COVID-19 Pandemic, messaging on social media became even more important.Twitter became a key battleground for that messaging. The data came from tweets containing the use of #JoeBiden and #DonaldTrump. The following visualizations show the story of the 2020 election as it was fought in the trenches of twitter.</font>
 
 ```{r}
 biden <- read.csv("C://Users//12607//Desktop//final_Project//biden_short.csv")
@@ -256,7 +256,18 @@ rm(biden)
 Column {.tabset .tabset-fade}
 -----------------------------------------------------------------------
 
-### Time Series Comparison
+### The Data
+
+The data for this analysis comes from twitter and via kaggle. It was initally was over a 25 day period starting in the middle of October and going a few days past the elections. Due to the sheer magnitude of the data it was redcuced in scope to make processing possible.
+
+```{r}
+bll_head <- head(bll, 5)
+bll_head
+```
+
+
+
+### Time Series - Comparison
 
 ```{r}
 # Area plot
@@ -264,59 +275,57 @@ ggplot(fin_comb_count) +
   geom_area(aes(x=date, y= trump_count), 
              color = "darkred", fill = "darkred") + 
   geom_area(aes(x=date, y= biden_count), 
-             color = "darkblue", fill = "darkblue")+labs(title="Use of #JoeBiden (Blue) and #DonaldTrump (Red) (Final 3 Days of the Election)", 
-         x="Date", y = "Count", subtitle = "Final 3 days Leading to the Election", caption = "Trump CLearly outpaced Biden in the last three days CHECK FOR CHANGE")
+             color = "darkblue", fill = "darkblue")+labs(title="Use of #JoeBiden (Blue) and #DonaldTrump (Red)", 
+         x="Date", y = "Number of Tweets Containing Each #", subtitle = "Final 3 days Leading to the Election", caption = "")
         
 
 ```
 
 This is the time series explanation
 
-### Time Series Biden
+### Time Series - Biden
 ```{r}
 # Basic line plot Biden
 ggplot(data = fin_biden_day_count, aes(x = date, y = biden_count))+
   geom_line(color = "darkblue", size = 2)+
-  labs(title="Use of #JoeBiden Through the Final 3 Days 
-       of the Election", 
-         x="Date", y = "Count")
+  labs(title="Use of #JoeBiden", subtitle = "Final 3 days Leading to the Election",
+         x="Date", y = "Number of Tweets Containing the #")
 ```  
 
 
-### Time Series Trump
+### Time Series - Trump
 ```{r}
 # Basic line plot Trump
 ggplot(data = fin_trump_day_count, aes(x = date, y = trump_count))+
-  geom_line(color = "red", size = 2)+labs(title="Use of #DonaldTrump 
-                                          Through the Final 3 Days of the Election", 
-         x="Date", y = "Count")
+  geom_line(color = "red", size = 2)+labs(title="Use of #DonaldTrump", subtitle = "Final 3 days Leading to the Election",
+         x="Date", y = "Number of Tweets Containing the #")
 ```  
 
 
-### Exploratory Biden 
+### Exploratory - Biden 
 ```{r}
 #pairs plot
 biden_19_20%>%
   select(!c(X)) %>% 
   select_if(function(x){is.numeric(x)})%>%
   filter((retweet_count < 500 | user_followers_count < 5000)) %>% 
-  pairs()
+  pairs(main="Biden Comparison Plot")
 ```
 
 
-### Exploratory Trump 
+### Exploratory - Trump 
 ```{r}
 #pairs plot
 biden_19_20%>%
   select(!c(X)) %>% 
   select_if(function(x){is.numeric(x)})%>%
   filter((retweet_count < 500 | user_followers_count < 5000)) %>% 
-  pairs()
+  pairs(main="Trump Comparison Plot")
 ```
 
 
 
-### Geographical Biden
+### Geographical - Biden
 ```{r}
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -325,14 +334,14 @@ world <- ne_countries(scale = "medium", returnclass = "sf")
 ggplot(data = world) +
     geom_sf() +
     geom_point(data = bll, aes(x = long, y = lat), size = .1, 
-        shape = 23, fill = "darkblue")
+        shape = 23, fill = "darkblue")+labs(title="World Map of #JoeBiden ", subtitle = "Tweeted from 7:00 pm to 8:00 pm on Election Night", x="", y = "")
 
 
 ```
 
 
 
-### Geographical Trump
+### Geographical - Trump
 ```{r}
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -341,12 +350,12 @@ world <- ne_countries(scale = "medium", returnclass = "sf")
 ggplot(data = world) +
     geom_sf() +
     geom_point(data = tll, aes(x = long, y = lat), size = .1, 
-        shape = 23, fill = "darkred")
+        shape = 23, fill = "darkred")+labs(title="World Map of #DonaldTrump ", subtitle = "Tweeted from 7:00 pm t0 8:00 pm on Election Night", x="", y = "")
 
 
 ```
 
-### Network Biden
+### Network - Biden
 ```{r}
 ggraph(rt_g2, layout = 'linear', circular = TRUE) + 
   geom_edge_arc(edge_width=0.125, aes(alpha=..index..,start_cap = label_rect(node1.name),end_cap = label_rect(node2.name))) +
@@ -356,11 +365,11 @@ ggraph(rt_g2, layout = 'linear', circular = TRUE) +
   geom_node_text(aes(label=node_label))+
   coord_fixed() +
   scale_size_area(trans="sqrt") +
-  labs(title="Biden Twitter City Relationships", subtitle="Most tweeted city names labeled. Darkers edges == more mentions.") +
+  labs(title="Biden Twitter City Relationships", subtitle="Nodes = (user_name and city). Darker Edges == More Connections") +
   theme_graph(base_family=font_rc) 
 ```
 
-### Network Trump
+### Network - Trump
 ```{r}
 ggraph(rt_gt2, layout = 'linear', circular = TRUE) + 
   geom_edge_arc(edge_width=0.125, aes(alpha=..index..,start_cap = label_rect(node1.name),end_cap = label_rect(node2.name))) +
@@ -370,7 +379,7 @@ ggraph(rt_gt2, layout = 'linear', circular = TRUE) +
   geom_node_text(aes(label=node_label))+
   coord_fixed() +
   scale_size_area(trans="sqrt") +
-  labs(title="Trump Twitter City Relationships", subtitle="Most tweeted city names labeled. Darkers edges == more mentions.") +
+  labs(title="Trump Twitter City Relationships", subtitle="Nodes = (user_name and city). Darker Edges == More Connections") +
   theme_graph(base_family=font_rc) 
 ```
 
@@ -393,7 +402,7 @@ wordcloud(words = trump_words$word, freq = bid_words$freq, random.order=FALSE, r
 p<-ggplot(data=bid_words, aes(x=word, y=freq)) +
   geom_bar(stat="identity", fill="darkblue")+
   theme_minimal()
-p+ coord_flip()+ labs(title="Most Used Words in Biden Twitter", 
+p+ coord_flip()+ labs(title="Most Used Words in Biden Twitter", subtitle = "Tweeted from 7:00 pm to 8:00 pm on Election Night",
          x="Word", y = "Count")
 ```
 
@@ -404,7 +413,7 @@ p+ coord_flip()+ labs(title="Most Used Words in Biden Twitter",
 p<-ggplot(data=trump_words, aes(x=word, y=freq)) +
   geom_bar(stat="identity", fill="darkred")+
   theme_minimal()
-p+ coord_flip()+labs(title="Most Used Words in Trump Twitter", 
+p+ coord_flip()+labs(title="Most Used Words in Trump Twitter",subtitle = "Tweeted from 7:00 pm to 8:00 pm on Election Night", 
          x="Word", y = "Count")
 
 ```

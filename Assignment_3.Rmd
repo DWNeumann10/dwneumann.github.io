@@ -1,0 +1,6 @@
+---
+title: "Assignment_3"
+author: "Doug Neumann"
+output: html_document
+---
+<img src="A_3.jpg" style="width:35%">
